@@ -79,10 +79,51 @@ export class AuthController {
     }
   }
 
+  static async me(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+      const result = await query(
+        `SELECT u.id, u.email, u.name, u.stripe_customer_id, u.fcm_token, u.created_at,
+                d.id as donor_id, d.total_donated, d.donor_rank, d.lifetime_value
+         FROM users u
+         LEFT JOIN donors d ON d.user_id = u.id
+         WHERE u.id = $1`,
+        [userId]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const row = result.rows[0];
+      res.json({
+        user: {
+          id: row.id,
+          email: row.email,
+          name: row.name,
+          stripe_customer_id: row.stripe_customer_id,
+          fcm_token: row.fcm_token,
+          created_at: row.created_at,
+        },
+        donor_id: row.donor_id,
+        donor: row.donor_id ? {
+          id: row.donor_id,
+          total_donated: row.total_donated,
+          donor_rank: row.donor_rank,
+          lifetime_value: row.lifetime_value,
+        } : null,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   static async registerFcmToken(req: Request, res: Response, next: NextFunction) {
     try {
       const { fcm_token } = fcmTokenSchema.parse(req.body);
-      const userId = (req as any).user?.userId;
+      const userId = req.user?.userId;
       if (!userId) return res.status(401).json({ error: 'Unauthorized' });
       await query('UPDATE users SET fcm_token = $1 WHERE id = $2', [fcm_token, userId]);
       res.json({ success: true });
