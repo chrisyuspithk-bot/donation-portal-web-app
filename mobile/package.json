@@ -2,7 +2,7 @@
   "name": "@fundraising/mobile",
   "version": "1.0.0",
   "private": true,
-  "main": "src/App.tsx",
+  "main": "index.ts",
   "expo": { "install": { "exclude": ["@types/react"] } },
   "scripts": {
     "start": "expo start",
