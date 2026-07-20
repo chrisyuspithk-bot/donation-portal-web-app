@@ -12,8 +12,9 @@ async function main() {
     await pool.query('SELECT 1');
     logger.info('Database connected');
 
-    await redis.connect();
-    await redisSub.connect();
+    // ioredis auto-connects, just wait for it
+    await redis.ping();
+    await redisSub.ping();
     logger.info('Redis connected');
 
     const server = http.createServer(app);
