@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,7 @@ const ADMIN_ID = 'admin';
 export default function ChatScreen() {
   const [input, setInput] = useState('');
   const [connected, setConnected] = useState(false);
+  const inputRef = useRef('');
   const user = useAuthStore((s) => s.user);
   const donorId = useAuthStore((s) => s.donorId);
   const messages = useChatStore((s) => s.messages[ADMIN_ID] || []);
@@ -58,15 +59,29 @@ export default function ChatScreen() {
     };
   }, [donorId]);
 
-  const handleSend = useCallback(() => {
-    const text = input.trim();
+  const doSend = () => {
+    const text = inputRef.current.trim();
     if (!text || !donorId) return;
     sendChatMessage(donorId, text);
+    inputRef.current = '';
     setInput('');
     sendTyping(donorId, false);
-  }, [input, donorId]);
+  };
+
+  if (!donorId) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.emptyChat}>
+          <Text style={styles.emptyChatIcon}>🔌</Text>
+          <Text style={styles.emptyChatText}>Account setup needed</Text>
+          <Text style={styles.emptyChatSubtext}>Please log out and back in to enable chat</Text>
+        </View>
+      </View>
+    );
+  }
 
   const handleTyping = (text: string) => {
+    inputRef.current = text;
     setInput(text);
     if (!donorId) return;
     sendTyping(donorId, text.length > 0);
@@ -133,7 +148,7 @@ export default function ChatScreen() {
         />
         <TouchableOpacity
           style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]}
-          onPress={handleSend}
+          onPress={doSend}
           disabled={!input.trim()}
         >
           <Text style={styles.sendBtnText}>↑</Text>
