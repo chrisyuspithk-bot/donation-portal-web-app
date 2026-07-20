@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+*.log
+.agent_tmp/
+.expo/
+ios/Pods/
+android/.gradle/
+android/app/build/

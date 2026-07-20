@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "Fundraising",
+    "slug": "fundraising-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "fundraising",
+    "plugins": ["@stripe/stripe-react-native"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fundraising.mobile",
+      "associatedDomains": ["applinks:fundraising.app"]
+    },
+    "android": {
+      "package": "com.fundraising.mobile",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [{ "scheme": "https", "host": "fundraising.app" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "fundraising-saas",
+  "private": true,
+  "workspaces": ["shared", "backend", "web-admin", "mobile"],
+  "scripts": {
+    "dev:backend": "npm run dev -w backend",
+    "dev:web": "npm run dev -w web-admin",
+    "dev:mobile": "npm run start -w mobile",
+    "build:shared": "npm run build -w shared",
+    "build:backend": "npm run build -w backend",
+    "build:web": "npm run build -w web-admin",
+    "test:backend": "npm test -w backend",
+    "test:web": "npm test -w web-admin",
+    "lint": "eslint . --ext .ts,.tsx"
+  }
+}
