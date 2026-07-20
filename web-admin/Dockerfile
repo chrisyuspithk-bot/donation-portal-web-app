@@ -1,6 +1,6 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
-COPY package.json ./
+COPY package.json tsconfig.base.json ./
 COPY shared/package.json shared/tsconfig.json shared/
 COPY web-admin/package.json web-admin/tsconfig.json web-admin/vite.config.ts web-admin/tailwind.config.js web-admin/postcss.config.js web-admin/
 RUN npm install --workspace=web-admin --workspace=shared

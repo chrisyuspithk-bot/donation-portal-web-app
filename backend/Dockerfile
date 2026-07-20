@@ -1,7 +1,7 @@
 # Build stage
 FROM node:20-alpine AS builder
 WORKDIR /app
-COPY package.json ./
+COPY package.json tsconfig.base.json ./
 COPY shared/package.json shared/tsconfig.json shared/
 COPY backend/package.json backend/tsconfig.json backend/
 RUN npm install --workspace=backend --workspace=shared
