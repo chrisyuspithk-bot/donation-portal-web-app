@@ -22,7 +22,7 @@ fundraising-saas/
 │       ├── pages/        # Dashboard, Donations, Chat, Notifications
 │       ├── services/     # API client, Socket.io client
 │       └── stores/       # Zustand state management
-├── mobile/           # React Native (Expo) app
+├── mobile-new/       # React Native (Expo) app (current)
 │   └── src/
 │       ├── screens/      # Login, Register, Donate, History, Chat, Profile
 │       ├── navigation/   # Auth + Main tab navigators
@@ -50,6 +50,43 @@ fundraising-saas/
 - PostgreSQL 16+
 - Redis 7+
 - Stripe account ([test mode](https://dashboard.stripe.com/test/dashboard) for development)
+
+---
+
+## Stripe Setup (required for donations)
+
+Donations will return a 500 error until Stripe is configured. Here's how to set it up:
+
+### 1. Get your Stripe keys
+
+Create a [Stripe account](https://dashboard.stripe.com/register) and get your **test keys** from the [dashboard](https://dashboard.stripe.com/test/apikeys):
+
+| Key | Where it goes |
+|-----|---------------|
+| **Publishable key** (`pk_test_...`) | Mobile app — set `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` |
+| **Secret key** (`sk_test_...`) | Backend — set `STRIPE_SECRET_KEY` in `.env` |
+| **Webhook secret** (`whsec_...`) | Backend — set `STRIPE_WEBHOOK_SECRET` in `.env` |
+
+### 2. Configure the backend
+
+```bash
+cd backend
+cp .env.example .env
+# Edit .env — fill in STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET
+```
+
+### 3. Configure the mobile app
+
+```bash
+cd mobile-new
+cp .env.example .env
+# Edit .env — fill in EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY
+```
+
+### 4. (Production only) Set up webhook endpoint
+
+For local dev, webhooks aren't needed — the app polls for payment confirmation.
+For production, register `https://your-domain.com/webhooks/stripe` in the Stripe dashboard and copy the signing secret.
 
 ---
 
