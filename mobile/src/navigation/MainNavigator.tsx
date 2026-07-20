@@ -19,24 +19,28 @@ export function MainNavigator() {
     >
       <Tab.Screen
         name="Donate"
-        component={DonateScreen}
         options={{ tabBarIcon: () => <Text>💝</Text>, headerTitle: 'Make a Donation' }}
-      />
+      >
+        {(props) => <DonateScreen {...props} />}
+      </Tab.Screen>
       <Tab.Screen
         name="History"
-        component={HistoryScreen}
         options={{ tabBarIcon: () => <Text>📋</Text>, headerTitle: 'Donation History' }}
-      />
+      >
+        {(props) => <HistoryScreen {...props} />}
+      </Tab.Screen>
       <Tab.Screen
         name="Chat"
-        component={ChatScreen}
         options={{ tabBarIcon: () => <Text>💬</Text>, headerTitle: 'Support Chat' }}
-      />
+      >
+        {(props) => <ChatScreen {...props} />}
+      </Tab.Screen>
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
         options={{ tabBarIcon: () => <Text>👤</Text>, headerTitle: 'Profile' }}
-      />
+      >
+        {(props) => <ProfileScreen {...props} />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 }

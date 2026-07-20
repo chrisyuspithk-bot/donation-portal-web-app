@@ -28,6 +28,10 @@
           "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single"
     }
   }
 }

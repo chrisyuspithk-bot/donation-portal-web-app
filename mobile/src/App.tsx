@@ -1,9 +1,10 @@
+import '@expo/metro-runtime';
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
-import { useAuthStore } from './src/stores/authStore';
-import { AuthNavigator } from './src/navigation/AuthNavigator';
-import { MainNavigator } from './src/navigation/MainNavigator';
+import { useAuthStore } from './stores/authStore';
+import { AuthNavigator } from './navigation/AuthNavigator';
+import { MainNavigator } from './navigation/MainNavigator';
 
 export default function App() {
   const token = useAuthStore((s) => s.token);
