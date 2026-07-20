@@ -44,36 +44,97 @@ fundraising-saas/
 | **Push** | Firebase Cloud Messaging (FCM) |
 | **Jobs** | BullMQ (Redis-backed) for receipt generation, node-cron for analytics |
 
-## Quick Start
+## Prerequisites
 
-### Prerequisites
 - Node.js 20+
 - PostgreSQL 16+
 - Redis 7+
-- Stripe account (test mode)
+- Stripe account ([test mode](https://dashboard.stripe.com/test/dashboard) for development)
 
-### Setup
+---
+
+## Development (local)
+
+Run each service directly on your machine with hot reload.
 
 ```bash
-# Install dependencies
+# 1. Clone and install
+git clone https://github.com/chrisyuspithk-bot/donation-portal-web-app.git
+cd donation-portal-web-app
 npm install
 
-# Set up environment
+# 2. Configure environment
 cp backend/.env.example backend/.env
-# Edit backend/.env with your Stripe keys and DB credentials
+# Edit backend/.env — set DB credentials + Stripe test keys
 
-# Initialize database
-psql -U postgres -d fundraising -f backend/src/db/schema.sql
+# 3. Create the database (local PostgreSQL)
+createdb fundraising
+psql -d fundraising -f backend/src/db/schema.sql
 
-# Start development
-npm run dev:backend    # API server on :4000
-npm run dev:web        # Admin dashboard on :5173
+# 4. Start everything in dev mode
+npm run dev:backend     # API server → http://localhost:4000 (nodemon hot reload)
+npm run dev:web         # Admin dashboard → http://localhost:5173 (Vite HMR)
+npm run dev:mobile      # React Native → Expo dev server (scan QR code)
 ```
 
-### Docker
+## Production (Docker)
+
+Single command with containers for all services. No local PostgreSQL or Redis needed.
 
 ```bash
-docker compose up -d
+# Set Stripe keys (required)
+export STRIPE_SECRET_KEY=sk_live_...
+export STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Build and start all services
+docker compose up -d --build
+```
+
+| Service | URL |
+|---------|-----|
+| Backend API | http://localhost:4000 |
+| Web Admin | http://localhost:5173 |
+| PostgreSQL | localhost:5432 |
+| Redis | localhost:6379 |
+
+### Useful Docker commands
+
+```bash
+docker compose ps              # Check running containers
+docker compose logs backend    # View backend logs
+docker compose restart backend # Restart after code changes
+docker compose down            # Stop everything
+docker compose up -d --build backend  # Rebuild backend only
+```
+
+## Build
+
+Build any workspace package without running it:
+
+```bash
+# Build everything
+npm run build -w shared
+npm run build -w backend
+npm run build -w web-admin
+
+# Or build all at once (if scripts are defined)
+npm run build -ws
+```
+
+### Build output
+
+| Package | Output | Description |
+|---------|--------|-------------|
+| `shared` | `shared/dist/` | Compiled TypeScript types |
+| `backend` | `backend/dist/` | JavaScript ready for `node dist/index.js` |
+| `web-admin` | `web-admin/dist/` | Static files → deploy to any CDN |
+| `mobile` | — | Built via Expo (`npx expo build:android` / `eas build`) |
+
+To verify a build:
+
+```bash
+npm run build -w backend    # compile TypeScript
+node backend/dist/index.js  # start from compiled output
 ```
 
 ## API Endpoints
