@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "main": "src/App.tsx",
+  "expo": { "install": { "exclude": ["@types/react"] } },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -31,7 +32,7 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
-    "@types/react": "~18.3.0",
+    "@types/react": "~18.3.1",
     "typescript": "~5.7.0"
   }
 }
