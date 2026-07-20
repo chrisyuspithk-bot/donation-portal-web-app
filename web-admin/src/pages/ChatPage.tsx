@@ -1,9 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { chatApi } from '../services/api';
 import { getSocket } from '../services/socket';
+import { useAuthStore } from '../stores/authStore';
 
 interface ChatSession {
   donor_id: string;
+  user_id: string;
   donor_name: string;
   email: string;
   unread_count: number;
@@ -17,6 +19,7 @@ interface Message {
 }
 
 export function ChatPage() {
+  const adminId = useAuthStore((s) => s.user?.id);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeDonor, setActiveDonor] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -29,7 +32,6 @@ export function ChatPage() {
     const socket = getSocket();
     socket.on('chat:send_message', (msg: Message) => {
       setMessages((prev) => [...prev, msg]);
-      // Refresh sessions to update unread counts
       chatApi.getSessions().then(({ data }) => setSessions(data.sessions)).catch(console.error);
     });
 
@@ -42,10 +44,11 @@ export function ChatPage() {
 
   const joinDonorChat = (donorId: string) => {
     setActiveDonor(donorId);
-    setMessages([]);
     const socket = getSocket();
     socket.emit('chat:join_room', donorId);
-    // Mark messages as read
+
+    chatApi.getMessages(donorId).then(({ data }) => setMessages(data.messages)).catch(() => setMessages([]));
+
     const donor = sessions.find((s) => s.donor_id === donorId);
     if (donor) {
       socket.emit('chat:mark_read', { sender_id: donorId });
@@ -102,7 +105,7 @@ export function ChatPage() {
             </div>
             <div className="flex-1 overflow-auto p-4 space-y-3">
               {messages.map((msg, i) => {
-                const isAdmin = msg.sender_id !== activeDonor;
+                const isAdmin = msg.sender_id === adminId;
                 return (
                   <div key={i} className={`flex ${isAdmin ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[70%] rounded-2xl px-4 py-2 text-sm ${

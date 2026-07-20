@@ -36,6 +36,7 @@ export const analyticsApi = {
 // Chat
 export const chatApi = {
   getSessions: () => api.get('/admin/chat/sessions'),
+  getMessages: (donorId: string) => api.get(`/admin/chat/messages/${donorId}`),
 };
 
 // Notifications

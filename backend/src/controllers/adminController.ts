@@ -127,7 +127,7 @@ export class AdminController {
   static async getActiveChatSessions(_req: Request, res: Response, next: NextFunction) {
     try {
       const result = await query(
-        `SELECT dr.id as donor_id, u.name as donor_name, u.email,
+        `SELECT dr.id as donor_id, u.id as user_id, u.name as donor_name, u.email,
                 COALESCE(
                   (SELECT COUNT(*) FROM chat_messages
                    WHERE receiver_id = dr.id AND is_read = false), 0
@@ -137,6 +137,23 @@ export class AdminController {
          ORDER BY u.name ASC`
       );
       res.json({ sessions: result.rows });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  static async getChatMessages(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { donorId } = req.params;
+      const result = await query(
+        `SELECT sender_id, receiver_id, message, created_at
+         FROM chat_messages
+         WHERE receiver_id = $1
+         ORDER BY created_at ASC
+         LIMIT 200`,
+        [donorId]
+      );
+      res.json({ messages: result.rows });
     } catch (err) {
       next(err);
     }

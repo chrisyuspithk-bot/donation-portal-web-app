@@ -37,19 +37,20 @@ export function initializeSocketIO(server: HttpServer): Server {
 
     // Auto-join donor's own chat room (so mobile donor receives admin replies immediately)
     try {
-      let donorResult = await query('SELECT id FROM donors WHERE user_id = $1', [user.userId]);
+      const donorResult = await query('SELECT id FROM donors WHERE user_id = $1', [user.userId]);
+      let donorId: string;
       if (donorResult.rows.length === 0) {
         // Auto-create donor record if missing (handles DB resets, legacy users)
         const { v4: uuidv4 } = require('uuid');
-        const donorId = uuidv4();
+        donorId = uuidv4();
         await query(
           'INSERT INTO donors (id, user_id, total_donated, donor_rank, lifetime_value) VALUES ($1, $2, 0, 0, 0)',
           [donorId, user.userId]
         );
-        donorResult = { rows: [{ id: donorId }] };
         logger.info(`Auto-created donor record for user ${user.userId}`);
+      } else {
+        donorId = donorResult.rows[0].id;
       }
-      const donorId = donorResult.rows[0].id;
       socket.join(`chat:${donorId}`);
       logger.info(`Auto-joined donor ${donorId} to chat:${donorId}`);
     } catch (err) {

@@ -7,7 +7,7 @@
     "start": "node dist/index.js",
     "test": "jest --passWithNoTests",
     "migrate": "node dist/db/migrate.js",
-    "seed": "node dist/db/seed.js"
+    "seed": "tsx src/db/seed.ts"
   },
   "dependencies": {
     "@fundraising/shared": "*",

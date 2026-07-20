@@ -16,8 +16,8 @@ export class DonationsController {
       const userId = req.user?.userId;
 
       // Always derive donor_id from the authenticated user (ignore client-provided value)
-      let donorId = donor_id;
       const donorResult = await query('SELECT id FROM donors WHERE user_id = $1', [userId]);
+      let donorId: string;
       if (donorResult.rows.length === 0) {
         // Auto-create donor record if missing (handles DB resets)
         const newId = require('uuid').v4();

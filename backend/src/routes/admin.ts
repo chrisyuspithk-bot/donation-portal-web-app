@@ -10,5 +10,6 @@ adminRouter.get('/analytics', AdminController.getAnalytics);
 adminRouter.get('/donations', AdminController.getAllDonations);
 adminRouter.post('/receipts/resend', AdminController.resendReceipts);
 adminRouter.get('/chat/sessions', AdminController.getActiveChatSessions);
+adminRouter.get('/chat/messages/:donorId', AdminController.getChatMessages);
 adminRouter.post('/notifications/broadcast', AdminController.broadcastNotification);
 adminRouter.delete('/donors/:donorId/erase', AdminController.eraseDonor);
