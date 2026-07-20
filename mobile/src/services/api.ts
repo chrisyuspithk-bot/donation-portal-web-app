@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { useAuthStore } from '../stores/authStore';
 
-const API_BASE = 'https://api.fundraising.app'; // Configure per environment
+// Android emulator: http://10.0.2.2:4000  |  iOS simulator: http://localhost:4000  |  Real device: your Mac's LAN IP
+const API_BASE = 'http://10.0.2.2:4000';
 
 export const api = axios.create({ baseURL: API_BASE });
 

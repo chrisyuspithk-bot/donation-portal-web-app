@@ -5,7 +5,15 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "fundraising",
-    "plugins": ["@stripe/stripe-react-native"],
+    "plugins": [
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "merchant.com.fundraising.mobile",
+          "enableGooglePay": false
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.fundraising.mobile",
