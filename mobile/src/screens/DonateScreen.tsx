@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
-import { useStripe } from '@stripe/stripe-react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
+import { useStripe } from '../stripe';
 import { useAuthStore } from '../stores/authStore';
 import { donationsApi } from '../services/api';
 import { getSocket } from '../services/socket';
@@ -15,6 +15,21 @@ export function DonateScreen() {
   const donorId = useAuthStore((s) => s.donorId);
 
   const selectedAmount = customAmount || amount;
+
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.container}>
+        <View style={styles.webNotice}>
+          <Text style={styles.webNoticeIcon}>📱</Text>
+          <Text style={styles.webNoticeTitle}>Mobile App Required</Text>
+          <Text style={styles.webNoticeText}>
+            Donations are processed securely through our iOS and Android apps.
+            Please download the app to make a donation.
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   const handleDonate = async () => {
     const amountCents = parseInt(selectedAmount, 10);
@@ -163,4 +178,8 @@ const styles = StyleSheet.create({
   donateBtnDisabled: { opacity: 0.5 },
   donateBtnText: { color: '#fff', fontSize: 18, fontWeight: '700' },
   secureText: { textAlign: 'center', color: '#9ca3af', fontSize: 13 },
+  webNotice: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
+  webNoticeIcon: { fontSize: 64, marginBottom: 16 },
+  webNoticeTitle: { fontSize: 22, fontWeight: 'bold', color: '#111827', marginBottom: 8 },
+  webNoticeText: { fontSize: 16, color: '#6b7280', textAlign: 'center', lineHeight: 24 },
 });
