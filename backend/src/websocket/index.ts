@@ -1,10 +1,10 @@
 import { Server as HttpServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
-import { config } from './config';
-import { query } from './config/database';
-import { logger } from './config/logger';
-import { AuthPayload } from './middleware/auth';
+import { config } from '../config';
+import { query } from '../config/database';
+import { logger } from '../config/logger';
+import { AuthPayload } from '../middleware/auth';
 
 let io: Server;
 
