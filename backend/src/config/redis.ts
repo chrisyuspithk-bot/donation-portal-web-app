@@ -7,6 +7,7 @@ export const redis = new Redis({
   password: config.redis.password,
   db: config.redis.db,
   lazyConnect: true,
+  maxRetriesPerRequest: null,
   retryStrategy: (times) => Math.min(times * 100, 3000),
 });
 
@@ -16,5 +17,6 @@ export const redisSub = new Redis({
   password: config.redis.password,
   db: config.redis.db,
   lazyConnect: true,
+  maxRetriesPerRequest: null,
   retryStrategy: (times) => Math.min(times * 100, 3000),
 });
