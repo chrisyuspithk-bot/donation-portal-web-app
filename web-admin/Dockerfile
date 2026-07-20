@@ -12,4 +12,5 @@ RUN npm run build -w web-admin
 
 FROM nginx:alpine
 COPY --from=builder /app/web-admin/dist /usr/share/nginx/html
+COPY web-admin/nginx/default.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
