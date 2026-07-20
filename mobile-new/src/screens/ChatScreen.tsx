@@ -27,17 +27,13 @@ export default function ChatScreen() {
   const [connected, setConnected] = useState(false);
   const user = useAuthStore((s) => s.user);
   const donorId = useAuthStore((s) => s.donorId);
-  const fetchDonorId = useAuthStore((s) => s.fetchDonorId);
   const messages = useChatStore((s) => s.messages[ADMIN_ID] || []);
   const isAdminTyping = useChatStore((s) => s.typingUsers[ADMIN_ID] || false);
   const flatListRef = useRef<FlatList>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!donorId) {
-      fetchDonorId();
-      return;
-    }
+    if (!donorId) return;
 
     const socket = connectSocket();
 
@@ -60,7 +56,7 @@ export default function ChatScreen() {
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
     };
-  }, [donorId, fetchDonorId]);
+  }, [donorId]);
 
   const handleSend = useCallback(() => {
     const text = input.trim();

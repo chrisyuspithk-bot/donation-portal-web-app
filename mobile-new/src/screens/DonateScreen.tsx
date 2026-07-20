@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -21,11 +21,6 @@ export default function DonateScreen() {
   const [result, setResult] = useState<PaymentConfirmation | null>(null);
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const donorId = useAuthStore((s) => s.donorId);
-  const fetchDonorId = useAuthStore((s) => s.fetchDonorId);
-
-  useEffect(() => {
-    if (!donorId) fetchDonorId();
-  }, [donorId, fetchDonorId]);
 
   const handleDonate = async () => {
     const cents = Math.round(parseFloat(amount) * 100);

@@ -46,6 +46,7 @@ export class AuthController {
       res.status(201).json({
         token,
         user: { id, email, name, stripe_customer_id: null, fcm_token: null, created_at: new Date().toISOString() },
+        donor_id: donorId,
       });
     } catch (err) {
       next(err);
@@ -56,7 +57,11 @@ export class AuthController {
     try {
       const { email, password } = loginSchema.parse(req.body);
       const result = await query(
-        'SELECT id, email, name, password_hash, stripe_customer_id, fcm_token, created_at FROM users WHERE email = $1',
+        `SELECT u.id, u.email, u.name, u.password_hash, u.stripe_customer_id, u.fcm_token, u.created_at,
+                d.id as donor_id
+         FROM users u
+         LEFT JOIN donors d ON d.user_id = u.id
+         WHERE u.email = $1`,
         [email]
       );
       if (result.rows.length === 0) {
@@ -72,8 +77,8 @@ export class AuthController {
         config.jwt.secret,
         { expiresIn: config.jwt.expiresIn } as any
       );
-      const { password_hash, ...userWithoutPassword } = user;
-      res.json({ token, user: userWithoutPassword });
+      const { password_hash, donor_id, ...userWithoutPassword } = user;
+      res.json({ token, user: userWithoutPassword, donor_id });
     } catch (err) {
       next(err);
     }

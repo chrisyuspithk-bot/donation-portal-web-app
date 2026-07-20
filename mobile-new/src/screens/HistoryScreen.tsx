@@ -19,13 +19,6 @@ export default function HistoryScreen() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const donorId = useAuthStore((s) => s.donorId);
-  const fetchDonorId = useAuthStore((s) => s.fetchDonorId);
-
-  useEffect(() => {
-    if (!donorId) {
-      fetchDonorId().finally(() => setLoading(false));
-    }
-  }, []);
 
   const fetchHistory = useCallback(async (pageNum: number, isRefresh = false) => {
     if (!donorId) return;
@@ -52,6 +45,8 @@ export default function HistoryScreen() {
     if (donorId) {
       setLoading(true);
       fetchHistory(1);
+    } else {
+      setLoading(false);
     }
   }, [donorId, fetchHistory]);
 

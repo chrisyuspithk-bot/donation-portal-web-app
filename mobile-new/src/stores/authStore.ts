@@ -16,7 +16,6 @@ interface AuthState {
   hydrate: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, name: string, password: string) => Promise<void>;
-  fetchDonorId: () => Promise<void>;
   registerFcmToken: (fcmToken: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -51,26 +50,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { data } = await api.post('/api/auth/login', { email, password });
     await SecureStore.setItemAsync(TOKEN_KEY, data.token);
     await SecureStore.setItemAsync(USER_KEY, JSON.stringify(data.user));
-    set({ token: data.token, user: data.user, isAuthenticated: true });
+    if (data.donor_id) {
+      await SecureStore.setItemAsync(DONOR_KEY, data.donor_id);
+    }
+    set({ token: data.token, user: data.user, donorId: data.donor_id || null, isAuthenticated: true });
   },
 
   register: async (email, name, password) => {
     const { data } = await api.post('/api/auth/register', { email, name, password });
     await SecureStore.setItemAsync(TOKEN_KEY, data.token);
     await SecureStore.setItemAsync(USER_KEY, JSON.stringify(data.user));
-    set({ token: data.token, user: data.user, isAuthenticated: true });
-  },
-
-  fetchDonorId: async () => {
-    try {
-      const { data } = await api.get('/api/auth/me');
-      if (data.donor_id) {
-        await SecureStore.setItemAsync(DONOR_KEY, data.donor_id);
-        set({ donorId: data.donor_id });
-      }
-    } catch {
-      // donor_id not yet available
+    if (data.donor_id) {
+      await SecureStore.setItemAsync(DONOR_KEY, data.donor_id);
     }
+    set({ token: data.token, user: data.user, donorId: data.donor_id || null, isAuthenticated: true });
   },
 
   registerFcmToken: async (fcmToken) => {
