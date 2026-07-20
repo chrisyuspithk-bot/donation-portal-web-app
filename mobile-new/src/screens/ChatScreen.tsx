@@ -13,7 +13,6 @@ import { useAuthStore } from '../stores/authStore';
 import { useChatStore } from '../stores/chatStore';
 import {
   connectSocket,
-  joinChatRoom,
   sendChatMessage,
   sendTyping,
   markMessagesRead,
@@ -40,7 +39,8 @@ export default function ChatScreen() {
 
     const onConnect = () => {
       setConnected(true);
-      joinChatRoom(donorId);
+      // ensure we're in the chat room (backend auto-joins too, this is a safety net)
+      socket.emit('chat:join_room', donorId);
       markMessagesRead(ADMIN_ID);
     };
 

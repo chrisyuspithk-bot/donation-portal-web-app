@@ -28,15 +28,38 @@ export function initializeSocketIO(server: HttpServer): Server {
     }
   });
 
-  io.on('connection', (socket: Socket) => {
+  io.on('connection', async (socket: Socket) => {
     const user = (socket as any).user as AuthPayload;
     logger.info(`Socket connected: ${user.userId}`);
 
     // Join personal room for targeted events
     socket.join(`user:${user.userId}`);
 
-    // Admin users join the dashboard room
-    socket.join('admin:dashboard');
+    // Auto-join donor's own chat room (so mobile donor receives admin replies immediately)
+    try {
+      const donorResult = await query('SELECT id FROM donors WHERE user_id = $1', [user.userId]);
+      if (donorResult.rows.length > 0) {
+        const donorId = donorResult.rows[0].id;
+        socket.join(`chat:${donorId}`);
+        logger.info(`Auto-joined donor ${donorId} to chat:${donorId}`);
+      }
+    } catch (err) {
+      logger.error('Failed to auto-join donor chat room:', err);
+    }
+
+    // Admin users: join dashboard room + all donor chat rooms
+    if (user.email?.endsWith('@admin.fundraising.local')) {
+      socket.join('admin:dashboard');
+      try {
+        const donors = await query('SELECT id FROM donors');
+        for (const donor of donors.rows) {
+          socket.join(`chat:${donor.id}`);
+        }
+        logger.info(`Admin ${user.userId} joined ${donors.rows.length} donor chat rooms`);
+      } catch (err) {
+        logger.error('Failed to join donor chat rooms for admin:', err);
+      }
+    }
 
     socket.on('chat:join_room', (donorId: string) => {
       socket.join(`chat:${donorId}`);
