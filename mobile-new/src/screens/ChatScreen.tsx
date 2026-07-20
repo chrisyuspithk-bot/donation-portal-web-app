@@ -26,45 +26,56 @@ export default function ChatScreen() {
   const [input, setInput] = useState('');
   const [connected, setConnected] = useState(false);
   const user = useAuthStore((s) => s.user);
+  const donorId = useAuthStore((s) => s.donorId);
+  const fetchDonorId = useAuthStore((s) => s.fetchDonorId);
   const messages = useChatStore((s) => s.messages[ADMIN_ID] || []);
   const isAdminTyping = useChatStore((s) => s.typingUsers[ADMIN_ID] || false);
   const flatListRef = useRef<FlatList>(null);
   const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const roomId = user?.id || '';
-
   useEffect(() => {
-    if (!user) return;
-    try {
-      const s = connectSocket();
-      s.on('connect', () => {
-        setConnected(true);
-        joinChatRoom(roomId);
-        markMessagesRead(ADMIN_ID);
-      });
-      s.on('disconnect', () => setConnected(false));
-      return () => {
-        s.off('connect');
-        s.off('disconnect');
-      };
-    } catch {
-      // socket already connected or auth missing
+    if (!donorId) {
+      fetchDonorId();
+      return;
     }
-  }, [user, roomId]);
+
+    const socket = connectSocket();
+
+    const onConnect = () => {
+      setConnected(true);
+      joinChatRoom(donorId);
+      markMessagesRead(ADMIN_ID);
+    };
+
+    const onDisconnect = () => setConnected(false);
+
+    if (socket.connected) {
+      onConnect();
+    }
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+
+    return () => {
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+    };
+  }, [donorId, fetchDonorId]);
 
   const handleSend = useCallback(() => {
     const text = input.trim();
-    if (!text || !user) return;
-    sendChatMessage(ADMIN_ID, text);
+    if (!text || !donorId) return;
+    sendChatMessage(donorId, text);
     setInput('');
-    sendTyping(ADMIN_ID, false);
-  }, [input, user]);
+    sendTyping(donorId, false);
+  }, [input, donorId]);
 
   const handleTyping = (text: string) => {
     setInput(text);
-    sendTyping(ADMIN_ID, text.length > 0);
+    if (!donorId) return;
+    sendTyping(donorId, text.length > 0);
     if (typingTimeout.current) clearTimeout(typingTimeout.current);
-    typingTimeout.current = setTimeout(() => sendTyping(ADMIN_ID, false), 2000);
+    typingTimeout.current = setTimeout(() => sendTyping(donorId, false), 2000);
   };
 
   const renderMessage = ({ item }: { item: ChatMessage }) => {

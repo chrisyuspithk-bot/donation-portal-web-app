@@ -22,16 +22,11 @@ export function connectSocket(): Socket {
   });
 
   socket.on('chat:send_message', (msg) => {
-    const user = useAuthStore.getState().user;
-    if (!user) return;
-    const roomId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
-    useChatStore.getState().addMessage(roomId, msg);
+    useChatStore.getState().addMessage('admin', msg);
   });
 
   socket.on('chat:typing', (data: { sender_id: string; is_typing: boolean }) => {
-    const user = useAuthStore.getState().user;
-    if (!user) return;
-    useChatStore.getState().setTyping(data.sender_id, data.is_typing);
+    useChatStore.getState().setTyping('admin', data.is_typing);
   });
 
   socket.on('disconnect', (reason) => {
