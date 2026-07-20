@@ -17,6 +17,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, name: string, password: string) => Promise<void>;
   registerFcmToken: (fcmToken: string) => Promise<void>;
+  setDonorId: (donorId: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -84,6 +85,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await SecureStore.setItemAsync(USER_KEY, JSON.stringify(updated));
       set({ user: updated });
     }
+  },
+
+  setDonorId: async (donorId) => {
+    await SecureStore.setItemAsync(DONOR_KEY, donorId);
+    set({ donorId });
   },
 
   logout: async () => {

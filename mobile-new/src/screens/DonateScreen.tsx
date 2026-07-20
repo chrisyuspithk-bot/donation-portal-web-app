@@ -21,6 +21,7 @@ export default function DonateScreen() {
   const [result, setResult] = useState<PaymentConfirmation | null>(null);
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const donorId = useAuthStore((s) => s.donorId);
+  const setDonorId = useAuthStore((s) => s.setDonorId);
 
   const handleDonate = async () => {
     const cents = Math.round(parseFloat(amount) * 100);
@@ -41,6 +42,11 @@ export default function DonateScreen() {
         currency: 'usd',
         donor_id: donorId,
       });
+
+      // Self-heal: backend returns the authoritative donor_id
+      if (data.donor_id && data.donor_id !== donorId) {
+        setDonorId(data.donor_id);
+      }
 
       const { error } = await initPaymentSheet({
         paymentIntentClientSecret: data.client_secret,

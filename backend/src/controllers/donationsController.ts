@@ -6,19 +6,36 @@ import { query } from '../config/database';
 const createIntentSchema = z.object({
   amount: z.number().positive().int(),
   currency: z.string().length(3).default('usd'),
-  donor_id: z.string().uuid(),
+  donor_id: z.string().uuid().optional(),
 });
 
 export class DonationsController {
   static async createIntent(req: Request, res: Response, next: NextFunction) {
     try {
       const { amount, currency, donor_id } = createIntentSchema.parse(req.body);
+      const userId = req.user?.userId;
+
+      // Always derive donor_id from the authenticated user (ignore client-provided value)
+      let donorId = donor_id;
+      const donorResult = await query('SELECT id FROM donors WHERE user_id = $1', [userId]);
+      if (donorResult.rows.length === 0) {
+        // Auto-create donor record if missing (handles DB resets)
+        const newId = require('uuid').v4();
+        await query(
+          'INSERT INTO donors (id, user_id, total_donated, donor_rank, lifetime_value) VALUES ($1, $2, 0, 0, 0)',
+          [newId, userId]
+        );
+        donorId = newId;
+      } else {
+        donorId = donorResult.rows[0].id;
+      }
+
       const { client_secret, payment_intent_id } = await StripeService.createPaymentIntent(
         amount,
         currency,
-        donor_id
+        donorId
       );
-      res.json({ client_secret, payment_intent_id });
+      res.json({ client_secret, payment_intent_id, donor_id: donorId });
     } catch (err) {
       next(err);
     }
