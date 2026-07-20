@@ -38,6 +38,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       ]);
       if (token && userStr) {
         set({ token, user: JSON.parse(userStr), donorId, isAuthenticated: true, isLoading: false });
+
+        // fallback: if donor_id wasn't cached, fetch it via /me
+        if (!donorId) {
+          try {
+            const { data } = await api.get('/api/auth/me');
+            if (data.donor_id) {
+              await SecureStore.setItemAsync(DONOR_KEY, data.donor_id);
+              set({ donorId: data.donor_id });
+            }
+          } catch { /* /me not deployed yet, will get donor_id on next login */ }
+        }
       } else {
         set({ isLoading: false });
       }
