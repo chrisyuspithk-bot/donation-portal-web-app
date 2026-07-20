@@ -22,7 +22,11 @@ export function connectSocket(): Socket {
   });
 
   socket.on('chat:send_message', (msg) => {
-    useChatStore.getState().addMessage('admin', msg);
+    // Skip echo of own messages (already added optimistically in ChatScreen)
+    const userId = useAuthStore.getState().user?.id;
+    if (msg.sender_id !== userId) {
+      useChatStore.getState().addMessage('admin', msg);
+    }
   });
 
   socket.on('chat:typing', (data: { sender_id: string; is_typing: boolean }) => {

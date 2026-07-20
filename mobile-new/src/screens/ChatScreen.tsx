@@ -61,7 +61,16 @@ export default function ChatScreen() {
 
   const doSend = () => {
     const text = inputRef.current.trim();
-    if (!text || !donorId) return;
+    if (!text || !donorId || !user) return;
+
+    // Optimistically add to local store so message appears immediately
+    useChatStore.getState().addMessage('admin', {
+      sender_id: user.id,
+      receiver_id: donorId,
+      message: text,
+      created_at: new Date().toISOString(),
+    });
+
     sendChatMessage(donorId, text);
     inputRef.current = '';
     setInput('');

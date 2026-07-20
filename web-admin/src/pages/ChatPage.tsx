@@ -26,16 +26,25 @@ export function ChatPage() {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const activeDonorRef = useRef(activeDonor);
+  activeDonorRef.current = activeDonor;
+
   useEffect(() => {
     chatApi.getSessions().then(({ data }) => setSessions(data.sessions)).catch(console.error);
 
     const socket = getSocket();
-    socket.on('chat:send_message', (msg: Message) => {
-      setMessages((prev) => [...prev, msg]);
+    const handleMessage = (msg: Message) => {
+      const donorId = activeDonorRef.current;
+      // Only add message if it belongs to the currently active donor chat
+      if (donorId && msg.receiver_id === donorId) {
+        setMessages((prev) => [...prev, msg]);
+      }
       chatApi.getSessions().then(({ data }) => setSessions(data.sessions)).catch(console.error);
-    });
+    };
 
-    return () => { socket.off('chat:send_message'); };
+    socket.on('chat:send_message', handleMessage);
+
+    return () => { socket.off('chat:send_message', handleMessage); };
   }, []);
 
   useEffect(() => {
