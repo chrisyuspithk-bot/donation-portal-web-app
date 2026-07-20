@@ -127,12 +127,14 @@ export class AdminController {
   static async getActiveChatSessions(_req: Request, res: Response, next: NextFunction) {
     try {
       const result = await query(
-        `SELECT DISTINCT ON (dr.id) dr.id as donor_id, u.name as donor_name, u.email,
-                (SELECT COUNT(*) FROM chat_messages WHERE receiver_id = dr.id AND is_read = false) as unread_count
+        `SELECT dr.id as donor_id, u.name as donor_name, u.email,
+                COALESCE(
+                  (SELECT COUNT(*) FROM chat_messages
+                   WHERE receiver_id = dr.id AND is_read = false), 0
+                ) as unread_count
          FROM donors dr
          JOIN users u ON u.id = dr.user_id
-         JOIN chat_messages cm ON cm.sender_id = dr.id OR cm.receiver_id = dr.id
-         ORDER BY dr.id, cm.created_at DESC`
+         ORDER BY u.name ASC`
       );
       res.json({ sessions: result.rows });
     } catch (err) {
