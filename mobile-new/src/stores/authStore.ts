@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import type { User } from '../types';
-import api from '../api/client';
+import api, { setTokenGetter, setUnauthorizedHandler } from '../api/client';
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
@@ -101,3 +101,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ token: null, user: null, donorId: null, isAuthenticated: false });
   },
 }));
+
+// Wire up API client callbacks (lazy refs to avoid require cycle)
+setTokenGetter(() => useAuthStore.getState().token);
+setUnauthorizedHandler(() => useAuthStore.getState().logout());

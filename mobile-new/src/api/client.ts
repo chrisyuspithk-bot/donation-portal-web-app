@@ -1,7 +1,13 @@
 import axios from 'axios';
-import { useAuthStore } from '../stores/authStore';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000';
+
+// Callbacks set by authStore to break the require cycle
+let getToken: (() => string | null) | null = null;
+let onUnauthorized: (() => void) | null = null;
+
+export function setTokenGetter(fn: () => string | null) { getToken = fn; }
+export function setUnauthorizedHandler(fn: () => void) { onUnauthorized = fn; }
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -10,7 +16,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token;
+  const token = getToken?.();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -21,7 +27,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      useAuthStore.getState().logout();
+      onUnauthorized?.();
     }
     return Promise.reject(error);
   }
