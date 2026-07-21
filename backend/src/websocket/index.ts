@@ -94,11 +94,10 @@ export function initializeSocketIO(server: HttpServer): Server {
           created_at: new Date().toISOString(),
         };
 
-        // Emit to the donor's chat room (both donor and any admin who joined it)
+        // Emit to the donor's chat room — admins are already auto-joined
+        // to all donor chat rooms at connection time, so no separate
+        // admin:dashboard emit is needed (that would cause duplicates).
         io.to(`chat:${receiver_id}`).emit('chat:send_message', payload);
-        // Also emit to admin dashboard so all admins receive messages
-        // even if they haven't manually joined this donor's room yet
-        io.to('admin:dashboard').emit('chat:send_message', payload);
       } catch (err) {
         logger.error('Chat message error:', err);
         socket.emit('error', { message: 'Failed to send message' });

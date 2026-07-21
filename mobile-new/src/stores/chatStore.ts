@@ -17,6 +17,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   addMessage: (roomId, msg) => {
     const existing = get().messages[roomId] || [];
+    // Deduplicate: skip if the last message already matches
+    const last = existing[existing.length - 1];
+    if (last &&
+        last.sender_id === msg.sender_id &&
+        last.message === msg.message &&
+        last.created_at === msg.created_at) {
+      return;
+    }
     set({
       messages: { ...get().messages, [roomId]: [...existing, msg] },
     });

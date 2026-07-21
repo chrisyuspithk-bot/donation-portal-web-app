@@ -37,7 +37,17 @@ export function ChatPage() {
       const donorId = activeDonorRef.current;
       // Only add message if it belongs to the currently active donor chat
       if (donorId && msg.receiver_id === donorId) {
-        setMessages((prev) => [...prev, msg]);
+        setMessages((prev) => {
+          // Deduplicate: skip if the last message already matches (same sender, text, timestamp)
+          const last = prev[prev.length - 1];
+          if (last &&
+              last.sender_id === msg.sender_id &&
+              last.message === msg.message &&
+              last.created_at === msg.created_at) {
+            return prev;
+          }
+          return [...prev, msg];
+        });
       }
       chatApi.getSessions().then(({ data }) => setSessions(data.sessions)).catch(console.error);
     };
